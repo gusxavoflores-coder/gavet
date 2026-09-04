@@ -367,10 +367,16 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
     </div>
     <div class="fst">Foto de la mascota</div>
     <img id="fPvNuevo" style="display:none;width:100%;max-height:220px;object-fit:contain;border-radius:9px;background:var(--pri-light);margin-bottom:8px" alt="">
-    <label style="display:flex;align-items:center;gap:8px;background:var(--pri-light);border:2px dashed var(--pri-mid);border-radius:8px;padding:12px 16px;cursor:pointer;color:var(--pri-dark);font-size:13px;font-weight:700;margin-bottom:6px">
-      <span style="font-size:20px">📷</span> Sacar foto o elegir de galería
-      <input type="file" accept="image/*" onchange="prevFotoNuevo(this)" style="display:none">
-    </label>
+    <div style="display:flex;gap:8px;margin-bottom:6px">
+      <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--pri);border:2px solid var(--pri);border-radius:8px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:700;color:#fff">
+        📷 Cámara
+        <input type="file" accept="image/*" capture="environment" onchange="prevFotoNuevo(this)" style="display:none">
+      </label>
+      <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface2);border:2px solid var(--pri);border-radius:8px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--pri-dark)">
+        🖼️ Galería
+        <input type="file" accept="image/*" onchange="prevFotoNuevo(this)" style="display:none">
+      </label>
+    </div>
     <button type="button" id="fRmNuevo" class="btn bd bs" style="display:none;width:100%" onclick="rmFotoNuevo()">✕ Quitar foto</button>
     <div class="fg" style="margin-top:12px"><label class="fl">Notas</label><textarea class="ft" id="mNot" placeholder="Alergias, condiciones especiales..."></textarea></div>
     <div class="mf">
@@ -421,10 +427,16 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
     <div class="fg">
       <label class="fl">Foto de la mascota</label>
       <img id="fPvMasEdit" style="display:none;width:100%;max-height:220px;object-fit:contain;border-radius:9px;background:var(--pri-light);margin-bottom:8px" alt="">
-      <label style="display:flex;align-items:center;gap:8px;background:var(--pri-light);border:2px dashed var(--pri-mid);border-radius:8px;padding:12px 16px;cursor:pointer;color:var(--pri-dark);font-size:13px;font-weight:700;margin-bottom:6px">
-        <span style="font-size:20px">📷</span> Sacar foto o elegir de galería
-        <input type="file" accept="image/*" onchange="prevFotoMasEdit(this)" style="display:none">
-      </label>
+      <div style="display:flex;gap:8px;margin-bottom:6px">
+        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--pri);border:2px solid var(--pri);border-radius:8px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:700;color:#fff">
+          📷 Cámara
+          <input type="file" accept="image/*" capture="environment" onchange="prevFotoMasEdit(this)" style="display:none">
+        </label>
+        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface2);border:2px solid var(--pri);border-radius:8px;padding:10px 14px;cursor:pointer;font-size:13px;font-weight:700;color:var(--pri-dark)">
+          🖼️ Galería
+          <input type="file" accept="image/*" onchange="prevFotoMasEdit(this)" style="display:none">
+        </label>
+      </div>
       <button type="button" id="fRmMasEdit" class="btn bd bs" style="display:none;width:100%" onclick="rmFotoMasEdit()">✕ Quitar foto</button>
     <div class="mf"><button class="btn" onclick="closeM('mMas')">Cancelar</button><button class="btn bp" onclick="guardarMas()">Guardar</button></div>
   </div>
