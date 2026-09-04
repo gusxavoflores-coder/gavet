@@ -1047,11 +1047,9 @@ function editMas(id){
   if(m.FotoURL){
     document.getElementById('fPvMasEdit').src=driveImg(m.FotoURL);
     document.getElementById('fPvMasEdit').style.display='block';
-    document.getElementById('fPlMasEdit').style.display='none';
     document.getElementById('fRmMasEdit').style.display='block';
-    document.getElementById('faMasEdit').classList.add('hf');
   } else {
-    rmFotoMasEdit(null);
+    rmFotoMasEdit();
   }
   document.getElementById('mMas').style.display='flex';
   document.getElementById('mMas').classList.add('open');
