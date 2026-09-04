@@ -1404,7 +1404,7 @@ function driveImg(url){
   if(!url)return '';
   if(url.startsWith('data:'))return url;
   const m=url.match(/[?&]id=([^&]+)/);
-  if(m)return 'https://drive.google.com/uc?export=view&id='+m[1];
+  if(m)return 'https://lh3.googleusercontent.com/d/'+m[1]+'=w400';
   return url;
 }
 
