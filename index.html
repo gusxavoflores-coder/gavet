@@ -1321,44 +1321,52 @@ async function compartirHistorialMascota(mid){
   doc.setFontSize(13);doc.text('HISTORIAL CLÍNICO',210-14,12,{align:'right'});
   doc.setTextColor(0,0,0);let y=36;
 
-  // Intentar agregar foto de la mascota
-  if(m.FotoURL){
-    try{
-      let b64;
-      if(m.FotoURL.startsWith('data:')){
-        // Ya es data URL, usar directamente
-        b64=m.FotoURL;
-      } else {
-        // Drive URL — fetchear y convertir
-        const resp=await fetch(driveImg(m.FotoURL));
-        const blob=await resp.blob();
-        b64=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(blob);});
-      }
-      // Foto a la derecha, datos a la izquierda
-      doc.setFillColor(253,238,243);doc.roundedRect(14,y,182,46,2,2,'F');
-      doc.addImage(b64,'JPEG',150,y+3,40,40);
-      doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(139,32,72);
-      doc.text(m.Nombre+' ('+(m.Especie==='Gato'?'Gato':'Perro')+')',18,y+9);
-      doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(0,0,0);
-      doc.text([m.Raza||'',m.Sexo||'',calcEdad(m.FechaNac)||''].filter(Boolean).join(' · '),18,y+17);
-      doc.text('Color: '+(m.Color||'-'),18,y+24);
-      doc.text(m.Castrado==='Sí'?'Castrado/a: Sí':'Castrado/a: No',18,y+31);
-      doc.text('Dueño: '+(c?c.Nombre:'?')+(c&&c.Telefono?' · Tel: '+c.Telefono:''),18,y+38);
-      y+=52;
-    }catch{
-      // Sin foto — layout normal
-      doc.setFillColor(253,238,243);doc.roundedRect(14,y,182,30,2,2,'F');
-      doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(139,32,72);doc.text(m.Nombre+' ('+(m.Especie==='Gato'?'Gato':'Perro')+')',18,y+9);
-      doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(0,0,0);
-      doc.text([m.Raza||'',m.Sexo||'',calcEdad(m.FechaNac)||''].filter(Boolean).join(' · '),18,y+17);
-      doc.text('Dueño: '+(c?c.Nombre:'?')+(c&&c.Telefono?' · Tel: '+c.Telefono:''),18,y+24);y+=36;
-    }
+  // Cargar foto de la mascota via canvas (evita CORS)
+  async function getFotoB64(fotoURL){
+    if(!fotoURL)return null;
+    if(fotoURL.startsWith('data:'))return fotoURL;
+    return new Promise(res=>{
+      const img=new Image();img.crossOrigin='anonymous';
+      img.onload=()=>{
+        const cv=document.createElement('canvas');cv.width=img.width;cv.height=img.height;
+        cv.getContext('2d').drawImage(img,0,0);
+        try{res(cv.toDataURL('image/jpeg',0.85));}catch{res(null);}
+      };
+      img.onerror=()=>res(null);
+      img.src=driveImg(fotoURL);
+    });
+  }
+
+  const fotoB64=await getFotoB64(m.FotoURL);
+
+  // Header de mascota con foto grande
+  const boxH=fotoB64?56:36;
+  doc.setFillColor(253,238,243);doc.roundedRect(14,y,182,boxH,3,3,'F');
+  doc.setDrawColor(200,88,120);doc.roundedRect(14,y,182,boxH,3,3,'S');
+
+  if(fotoB64){
+    // Foto cuadrada a la izquierda
+    doc.addImage(fotoB64,'JPEG',17,y+3,50,50);
+    // Datos a la derecha de la foto
+    const xd=72;
+    doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(139,32,72);
+    doc.text(m.Nombre,xd,y+11);
+    doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(80,80,80);
+    doc.text((m.Especie||'')+' · '+(m.Raza||'Sin raza'),xd,y+19);
+    doc.text([m.Sexo||'',calcEdad(m.FechaNac)||'',m.Color?'Color: '+m.Color:''].filter(Boolean).join(' · '),xd,y+26);
+    doc.text((m.Castrado==='Sí'?'✓ Castrado/a':'✗ No castrado/a')+(m.Microchip?' · Chip: '+m.Microchip:''),xd,y+33);
+    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(139,32,72);
+    doc.text('Dueño/a:',xd,y+42);
+    doc.setFont('helvetica','normal');doc.setTextColor(0,0,0);
+    doc.text((c?c.Nombre:'?')+(c&&c.Telefono?' · 📞 '+c.Telefono:''),xd+18,y+42);
+    y+=boxH+6;
   } else {
-    doc.setFillColor(253,238,243);doc.roundedRect(14,y,182,30,2,2,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(139,32,72);doc.text(m.Nombre+' ('+(m.Especie==='Gato'?'Gato':'Perro')+')',18,y+9);
-    doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(0,0,0);
-    doc.text([m.Raza||'',m.Sexo||'',calcEdad(m.FechaNac)||''].filter(Boolean).join(' · '),18,y+17);
-    doc.text('Dueño: '+(c?c.Nombre:'?')+(c&&c.Telefono?' · Tel: '+c.Telefono:''),18,y+24);y+=36;
+    // Sin foto — layout compacto
+    doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(139,32,72);doc.text(m.Nombre,18,y+10);
+    doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(80,80,80);
+    doc.text((m.Especie||'')+' · '+(m.Raza||'')+(m.Sexo?' · '+m.Sexo:''),18,y+18);
+    doc.text('Dueño/a: '+(c?c.Nombre:'?')+(c&&c.Telefono?' · Tel: '+c.Telefono:''),18,y+26);
+    y+=boxH+6;
   }
 
   // Último peso
