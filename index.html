@@ -1284,18 +1284,44 @@ async function compartirPDF(doc,nombre,titulo){const blob=doc.output('blob');con
 
 async function generarPresupuestoCon(cid2){
   const c=S.con.find(c=>c.ID==cid2);if(!c)return;
+  const mas=S.mas.find(m=>m.ID==c.MascotaID);
+  const cli=S.cli.find(cl=>cl.ID==(mas&&mas.ClienteID));
   const {jsPDF}=window.jspdf;const doc=new jsPDF({unit:'mm',format:'a4'});
-  const PRI='C85878';const PRI_DARK='8B2048';
   doc.setFillColor(200,88,120);doc.rect(0,0,210,28,'F');
   doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');doc.text('GA VET - CLÍNICA VETERINARIA',14,12);
   doc.setFontSize(10);doc.setFont('helvetica','normal');doc.text('Clínica Veterinaria',14,20);
   doc.setFontSize(13);doc.setFont('helvetica','bold');doc.text('PRESUPUESTO / RECIBO',210-14,12,{align:'right'});
   doc.setTextColor(0,0,0);let y=36;
-  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);doc.text('Fecha: '+new Date().toLocaleDateString('es-AR'),14,y);y+=8;
-  doc.setFillColor(253,238,243);doc.roundedRect(14,y,182,22,2,2,'F');
-  doc.setTextColor(0,0,0);doc.setFont('helvetica','bold');doc.setFontSize(11);
-  const emoji=c.Especie==='Gato'?'🐱':'🐶';
-  doc.text('Mascota: '+c.MascotaNombre+' ('+c.Especie+')',18,y+8);doc.text('Dueño: '+c.DuenioNombre,18,y+15);y+=28;
+  doc.setFontSize(10);doc.setFont('helvetica','normal');doc.setTextColor(80,80,80);
+  doc.text('Fecha consulta: '+(c.Fecha||new Date().toLocaleDateString('es-AR')),14,y);y+=8;
+
+  // Foto de la mascota igual que historial
+  const fotoB64=mas?await getFotoB64(mas.FotoURL):null;
+  const boxH=fotoB64?56:36;
+  doc.setFillColor(253,238,243);doc.roundedRect(14,y,182,boxH,3,3,'F');
+  doc.setDrawColor(200,88,120);doc.roundedRect(14,y,182,boxH,3,3,'S');
+  if(fotoB64){
+    doc.addImage(fotoB64,'JPEG',17,y+3,50,50);
+    const xd=72;
+    doc.setFont('helvetica','bold');doc.setFontSize(17);doc.setTextColor(139,32,72);
+    doc.text(c.MascotaNombre,xd,y+11);
+    doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(80,80,80);
+    doc.text((c.Especie||'')+(mas&&mas.Raza?' · '+mas.Raza:''),xd,y+19);
+    doc.text((mas&&mas.Sexo?mas.Sexo+' · ':'')+(mas?calcEdad(mas.FechaNac)||'':''),xd,y+26);
+    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(139,32,72);
+    doc.text('Dueño/a:',xd,y+36);
+    doc.setFont('helvetica','normal');doc.setTextColor(0,0,0);
+    doc.text(c.DuenioNombre+(cli&&cli.Telefono?' · 📞 '+cli.Telefono:''),xd+18,y+36);
+    if(c.Peso){doc.setTextColor(139,32,72);doc.text('Peso: '+c.Peso+' kg',xd,y+44);}
+    y+=boxH+6;
+  } else {
+    doc.setFont('helvetica','bold');doc.setFontSize(16);doc.setTextColor(139,32,72);doc.text(c.MascotaNombre,18,y+10);
+    doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(80,80,80);
+    doc.text((c.Especie||'')+(mas&&mas.Raza?' · '+mas.Raza:''),18,y+18);
+    doc.text('Dueño/a: '+c.DuenioNombre+(cli&&cli.Telefono?' · Tel: '+cli.Telefono:''),18,y+26);
+    y+=boxH+6;
+  }
+
   doc.setDrawColor(200,88,120);doc.line(14,y,196,y);y+=6;
   doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(139,32,72);doc.text('TIPO: '+c.Tipo,14,y);y+=6;
   if(c.Motivo){doc.setFont('helvetica','normal');doc.setFontSize(10);doc.setTextColor(0,0,0);const ml=doc.splitTextToSize('Motivo: '+c.Motivo,178);doc.text(ml,14,y);y+=ml.length*5+4;}
