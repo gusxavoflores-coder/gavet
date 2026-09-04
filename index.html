@@ -357,19 +357,9 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
     </div>
     <div class="fst">Foto de la mascota</div>
     <img id="fPvNuevo" style="display:none;width:100%;max-height:220px;object-fit:contain;border-radius:9px;background:var(--pri-light);margin-bottom:8px" alt="">
-    <div style="display:flex;gap:8px">
-      <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--pri-light);border:2px solid var(--pri-mid);border-radius:8px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;color:var(--pri-dark)">
-        📷 Cámara
-        <input type="file" accept="image/*" capture="environment" onchange="prevFotoNuevo(this)" style="display:none">
-      </label>
-      <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface2);border:2px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text)">
-        🖼️ Galería
-        <input type="file" accept="image/*" onchange="prevFotoNuevo(this)" style="display:none">
-      </label>
-    </div>
-    <div id="fRmNuevo" style="display:none;margin-top:6px">
-      <button onclick="rmFotoNuevo(event)" class="btn bd bs" style="width:100%">✕ Quitar foto</button>
-    </div>
+    <input type="file" accept="image/*" id="fINuevo" style="display:none" onchange="prevFotoNuevo(this)">
+    <button type="button" class="btn bp" style="width:100%;margin-bottom:6px" onclick="document.getElementById('fINuevo').click()">📷 Sacar foto o elegir de galería</button>
+    <button type="button" id="fRmNuevo" class="btn bd bs" style="display:none;width:100%" onclick="rmFotoNuevo()">✕ Quitar foto</button>
     <div class="fg" style="margin-top:12px"><label class="fl">Notas</label><textarea class="ft" id="mNot" placeholder="Alergias, condiciones especiales..."></textarea></div>
     <div class="mf">
       <button class="btn" onclick="closeM('mNuevo')">Cancelar</button>
@@ -419,20 +409,9 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
     <div class="fg">
       <label class="fl">Foto de la mascota</label>
       <img id="fPvMasEdit" style="display:none;width:100%;max-height:220px;object-fit:contain;border-radius:9px;background:var(--pri-light);margin-bottom:8px" alt="">
-      <div style="display:flex;gap:8px">
-        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--pri-light);border:2px solid var(--pri-mid);border-radius:8px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;color:var(--pri-dark)">
-          📷 Cámara
-          <input type="file" accept="image/*" capture="environment" onchange="prevFotoMasEdit(this)" style="display:none">
-        </label>
-        <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;background:var(--surface2);border:2px solid var(--border);border-radius:8px;padding:10px;cursor:pointer;font-size:13px;font-weight:700;color:var(--text)">
-          🖼️ Galería
-          <input type="file" accept="image/*" onchange="prevFotoMasEdit(this)" style="display:none">
-        </label>
-      </div>
-      <div id="fRmMasEdit" style="display:none;margin-top:6px">
-        <button onclick="rmFotoMasEdit(event)" class="btn bd bs" style="width:100%">✕ Quitar foto</button>
-      </div>
-    </div>
+      <input type="file" accept="image/*" id="fiMasEdit" style="display:none" onchange="prevFotoMasEdit(this)">
+      <button type="button" class="btn bp" style="width:100%;margin-bottom:6px" onclick="document.getElementById('fiMasEdit').click()">📷 Sacar foto o elegir de galería</button>
+      <button type="button" id="fRmMasEdit" class="btn bd bs" style="display:none;width:100%" onclick="rmFotoMasEdit()">✕ Quitar foto</button>
     <div class="mf"><button class="btn" onclick="closeM('mMas')">Cancelar</button><button class="btn bp" onclick="guardarMas()">Guardar</button></div>
   </div>
 </div>
@@ -992,8 +971,8 @@ function comprimirParaDrive(b64,mime){return new Promise(resolve=>{const img=new
 function rendFotosCon(){const g=document.getElementById('fotosConGrid');if(!g)return;g.innerHTML=fotosConsulta.map((f,i)=>`<div style="position:relative;border-radius:7px;overflow:hidden;border:1.5px solid var(--pri-mid)"><img src="data:${f.mime};base64,${f.b64}" style="width:100%;height:70px;object-fit:cover;display:block"><button onclick="fotosConsulta.splice(${i},1);rendFotosCon()" style="position:absolute;top:3px;right:3px;background:rgba(255,255,255,.9);border:none;border-radius:4px;padding:1px 5px;font-size:11px;cursor:pointer;color:var(--red);font-weight:700">✕</button></div>`).join('');}
 
 // FOTO NUEVA MASCOTA
-function prevFotoNuevo(inp){if(!inp.files||!inp.files[0])return;comprimirFoto(inp.files[0]).then(f=>{fotoNuevoB64=f.b64;fotoNuevoMime=f.mime;const img=document.getElementById('fPvNuevo');img.src='data:'+f.mime+';base64,'+f.b64;img.style.display='block';document.getElementById('fRmNuevo').style.display='block';toast('Foto lista ✓');});}
-function rmFotoNuevo(e){if(e&&e.stopPropagation)e.stopPropagation();fotoNuevoB64=null;fotoNuevoMime=null;document.getElementById('fPvNuevo').style.display='none';document.getElementById('fPvNuevo').src='';document.getElementById('fRmNuevo').style.display='none';}
+function prevFotoNuevo(inp){if(!inp||!inp.files||!inp.files[0])return;comprimirFoto(inp.files[0]).then(f=>{fotoNuevoB64=f.b64;fotoNuevoMime=f.mime;document.getElementById('fPvNuevo').src='data:'+f.mime+';base64,'+f.b64;document.getElementById('fPvNuevo').style.display='block';document.getElementById('fRmNuevo').style.display='block';toast('Foto lista');});}
+function rmFotoNuevo(){fotoNuevoB64=null;fotoNuevoMime=null;document.getElementById('fPvNuevo').style.display='none';document.getElementById('fPvNuevo').src='';document.getElementById('fRmNuevo').style.display='none';document.getElementById('fINuevo').value='';}
 
 // GUARDAR
 function buscarPorDNI(dni){
@@ -1044,23 +1023,8 @@ async function guardarCli(){if(!S.url)return toast('Configurá la URL primero',1
 
 // Foto edicion mascota
 let fotoMasEditB64=null,fotoMasEditMime=null;
-function prevFotoMasEdit(inp){
-  if(!inp.files||!inp.files[0])return;
-  comprimirFoto(inp.files[0]).then(f=>{
-    fotoMasEditB64=f.b64;fotoMasEditMime=f.mime;
-    document.getElementById('fPvMasEdit').src='data:'+f.mime+';base64,'+f.b64;
-    document.getElementById('fPvMasEdit').style.display='block';
-    document.getElementById('fRmMasEdit').style.display='block';
-    toast('Foto lista ✓');
-  });
-}
-function rmFotoMasEdit(e){
-  if(e&&e.stopPropagation)e.stopPropagation();
-  fotoMasEditB64=null;fotoMasEditMime=null;
-  document.getElementById('fPvMasEdit').style.display='none';
-  document.getElementById('fPvMasEdit').src='';
-  document.getElementById('fRmMasEdit').style.display='none';
-}
+function prevFotoMasEdit(inp){if(!inp||!inp.files||!inp.files[0])return;comprimirFoto(inp.files[0]).then(f=>{fotoMasEditB64=f.b64;fotoMasEditMime=f.mime;document.getElementById('fPvMasEdit').src='data:'+f.mime+';base64,'+f.b64;document.getElementById('fPvMasEdit').style.display='block';document.getElementById('fRmMasEdit').style.display='block';toast('Foto lista');});}
+function rmFotoMasEdit(){fotoMasEditB64=null;fotoMasEditMime=null;document.getElementById('fPvMasEdit').style.display='none';document.getElementById('fPvMasEdit').src='';document.getElementById('fRmMasEdit').style.display='none';document.getElementById('fiMasEdit').value='';}
 
 let editMasId=null;
 function editMas(id){
