@@ -655,7 +655,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
 <script>
 const PIN_ADMIN='Aa100134';
 let logoTaps=0,logoTimer=null;
-let S={cli:[],mas:[],con:[],vac:[],catMed:[],catPet:[],catSvc:[],ventas:[],url:localStorage.getItem('gavet_url')||'https://script.google.com/macros/s/AKfycbzhOLBvotpt6uTswrdqgi74apZ_J5QrUyBx3amvCxPz1FRN6aC49ao6dMsLqfvSzqdF/exec'};
+let S={cli:[],mas:[],con:[],vac:[],catMed:[],catPet:[],catSvc:[],ventas:[],url:localStorage.getItem('gavet_url')||'https://script.google.com/macros/s/AKfycbzDXYFIkuTFd2yODHQxluT9M595HnXQygrbnfrE6yXn-x-ouRzdSxUfFcDgWPHSxp7J/exec'};
 let fotoNuevoB64=null,fotoNuevoMime=null;
 let fotosConsulta=[];
 let clienteNuevoId=null;
@@ -743,6 +743,17 @@ async function api(params){
   Object.entries(params).forEach(([k,v])=>u.searchParams.set(k,v));
   try{const r=await fetch(u.toString());return await r.json();}
   catch{toast('Error de conexión',1);return null;}
+}
+
+async function apiPost(params){
+  if(!S.url)return null;
+  try{
+    const r=await fetch(S.url,{
+      method:'POST',
+      body:JSON.stringify(params)
+    });
+    return await r.json();
+  }catch{toast('Error de conexión',1);return null;}
 }
 
 async function cargarDatos(){
@@ -1035,7 +1046,7 @@ async function guardarNuevo(){
   if(fotoNuevoB64&&fotoNuevoMime){
     toast('Subiendo foto a Drive...');
     const b64drive=await comprimirParaDrive(fotoNuevoB64,fotoNuevoMime);
-    const rf=await api({action:'uploadFoto',patente:nomMas+'_'+Date.now(),fotoBase64:b64drive,mimeType:'image/jpeg'});
+    const rf=await apiPost({action:'uploadFoto',patente:nomMas+'_'+Date.now(),fotoBase64:b64drive,mimeType:'image/jpeg'});
     if(rf&&rf.url)fotoURL=rf.url;
   }
   const newMas={ID:(Date.now()+1).toString(),ClienteID:cliId,Nombre:nomMas,Especie:document.getElementById('mEsp').value,Raza:document.getElementById('mRaza').value.trim(),Sexo:document.getElementById('mSexo').value,FechaNac:document.getElementById('mNac').value,Color:document.getElementById('mColor').value.trim(),Peso:document.getElementById('mPeso').value,Microchip:document.getElementById('mChip').value.trim(),Castrado:document.getElementById('mCast').value,FotoURL:fotoURL,Notas:document.getElementById('mNot').value.trim()};
@@ -1090,7 +1101,7 @@ async function guardarMas(){
   if(fotoMasEditB64&&fotoMasEditMime){
     toast('Subiendo foto a Drive...');
     const b64drive=await comprimirParaDrive(fotoMasEditB64,fotoMasEditMime);
-    const rf=await api({action:'uploadFoto',patente:nom+'_'+Date.now(),fotoBase64:b64drive,mimeType:'image/jpeg'});
+    const rf=await apiPost({action:'uploadFoto',patente:nom+'_'+Date.now(),fotoBase64:b64drive,mimeType:'image/jpeg'});
     if(rf&&rf.url)fotoURL=rf.url;
   }
   const data={ClienteID:cid,Nombre:nom,Especie:document.getElementById('mEspe').value,Raza:document.getElementById('mRazae').value.trim(),Sexo:document.getElementById('mSexoe').value,FechaNac:document.getElementById('mNace').value,Color:document.getElementById('mColore').value.trim(),Peso:document.getElementById('mPesoe').value,Microchip:document.getElementById('mChipe').value.trim(),Castrado:document.getElementById('mCaste').value,Notas:document.getElementById('mNote').value.trim()};
@@ -1111,7 +1122,7 @@ async function guardarCon(){
   const hon=parseFloat(document.getElementById('cHon').value)||0;
   const cid2=Date.now().toString();
   let fotosURLs=[];
-  if(fotosConsulta.length){toast('Subiendo fotos...');for(const f of fotosConsulta){const r=await api({action:'uploadFoto',patente:mas.Nombre+'_con_'+cid2,fotoBase64:f.b64,mimeType:f.mime});if(r&&r.url)fotosURLs.push(r.url);}}
+  if(fotosConsulta.length){toast('Subiendo fotos...');for(const f of fotosConsulta){const r=await apiPost({action:'uploadFoto',patente:mas.Nombre+'_con_'+cid2,fotoBase64:f.b64,mimeType:f.mime});if(r&&r.url)fotosURLs.push(r.url);}}
   const examen=getExamen();
   const d={ID:cid2,MascotaID:mid,MascotaNombre:mas?mas.Nombre:'',Especie:mas?mas.Especie:'',DuenioNombre:cli?cli.Nombre:'',Fecha:document.getElementById('cFecha').value,Tipo:document.getElementById('cTipo').value,Peso:document.getElementById('cPeso').value,Motivo:motivo,Diagnostico:document.getElementById('cDiag').value.trim(),Tratamiento:document.getElementById('cTrat').value.trim(),Productos:prods.map(p=>p.n).join(', '),Honorarios:hon,Total:hon+tot,ProxControl:document.getElementById('cProxControl').value,ExamenFisico:examen,Fotos:fotosURLs.join('|'),Notas:document.getElementById('cNotas').value.trim()};
   await api({action:'addRow',sheet:'Consultas',data:JSON.stringify(d)});
@@ -1141,7 +1152,7 @@ async function guardarCatMed(){
   if(!S.url)return toast('Configurá la URL primero',1);
   const n=document.getElementById('cmNom').value.trim();if(!n)return toast('Nombre obligatorio',1);
   let fotoURL='';
-  if(fotoCatMedB64){toast('Subiendo foto...');const r=await api({action:'uploadFoto',patente:'prod_med_'+Date.now(),fotoBase64:fotoCatMedB64.b64,mimeType:fotoCatMedB64.mime});if(r&&r.url)fotoURL=r.url;}
+  if(fotoCatMedB64){toast('Subiendo foto...');const r=await apiPost({action:'uploadFoto',patente:'prod_med_'+Date.now(),fotoBase64:fotoCatMedB64.b64,mimeType:fotoCatMedB64.mime});if(r&&r.url)fotoURL=r.url;}
   if(editCatMedId){
     const data={Nombre:n,Tipo:document.getElementById('cmTipo').value,Precio:document.getElementById('cmPrecio').value,Stock:document.getElementById('cmStock').value,Notas:document.getElementById('cmNotas').value.trim()};
     if(fotoURL)data.FotoURL=fotoURL;
@@ -1157,7 +1168,7 @@ async function guardarCatPet(){
   if(!S.url)return toast('Configurá la URL primero',1);
   const n=document.getElementById('cpNom').value.trim();if(!n)return toast('Nombre obligatorio',1);
   let fotoURL='';
-  if(fotoCatPetB64){toast('Subiendo foto...');const r=await api({action:'uploadFoto',patente:'prod_pet_'+Date.now(),fotoBase64:fotoCatPetB64.b64,mimeType:fotoCatPetB64.mime});if(r&&r.url)fotoURL=r.url;}
+  if(fotoCatPetB64){toast('Subiendo foto...');const r=await apiPost({action:'uploadFoto',patente:'prod_pet_'+Date.now(),fotoBase64:fotoCatPetB64.b64,mimeType:fotoCatPetB64.mime});if(r&&r.url)fotoURL=r.url;}
   if(editCatPetId){
     const data={Nombre:n,Categoria:document.getElementById('cpCat').value,Precio:document.getElementById('cpPrecio').value,Stock:document.getElementById('cpStock').value,Notas:document.getElementById('cpNotas').value.trim()};
     if(fotoURL)data.FotoURL=fotoURL;
