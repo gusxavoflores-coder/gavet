@@ -832,7 +832,7 @@ function updDash(){
   }).join('');
   const ults=[...S.con].sort((a,b)=>new Date(b.Fecha)-new Date(a.Fecha)).slice(0,6);
   document.getElementById('dCon').innerHTML=!ults.length?'<div class="es">Sin consultas</div>':ults.map(c=>{
-    return `<div class="ai ok"><div><div class="al">${c.Fecha||''} · ${c.MascotaNombre}</div><div class="at">${(c.Motivo||'').substring(0,45)}${(c.Motivo||'').length>45?'...':''}</div></div><span class="chip cp">${c.Tipo||'Consulta'}</span></div>`;
+    return `<div class="ai ok"><div><div class="al">${fmtFecha(c.Fecha)||''} · ${c.MascotaNombre}</div><div class="at">${(c.Motivo||'').substring(0,45)}${(c.Motivo||'').length>45?'...':''}</div></div><span class="chip cp">${c.Tipo||'Consulta'}</span></div>`;
   }).join('');
 }
 
@@ -902,7 +902,7 @@ function rendCon(){
   tb.innerHTML=sorted.map(c=>{
     const fotos=(c.Fotos||'').split('|').filter(Boolean);
     const fBtn=fotos.length?`<button onclick="verFotos(${JSON.stringify(fotos).replace(/"/g,'&quot;')})" style="background:var(--pri-light);border:1px solid var(--pri-mid);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--pri-dark);font-weight:700">📷 ${fotos.length}</button>`:'';
-    return `<tr><td style="white-space:nowrap">${c.Fecha||'-'}</td><td><span class="chip ${c.Especie==='Gato'?'cp':'cs'}">${c.Especie==='Gato'?'🐱':'🐶'} ${c.MascotaNombre}</span></td><td>${c.DuenioNombre||'-'}</td><td><span class="chip cy">${c.Tipo||'-'}</span></td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.Motivo||'-'}</td><td>${c.Peso?c.Peso+' kg':'-'}</td><td class="hi">$${Number(c.Total||0).toLocaleString()}</td><td>${fBtn}</td><td><div style="display:flex;gap:4px"><button class="btn bs" onclick="generarPresupuestoCon('${c.ID}')">💰 Recibo</button><button class="btn bs bd" onclick="borrar('Consultas','${c.ID}','con')">🗑️</button></div></td></tr>`;
+    return `<tr><td style="white-space:nowrap">${fmtFecha(c.Fecha)||'-'}</td><td><span class="chip ${c.Especie==='Gato'?'cp':'cs'}">${c.Especie==='Gato'?'🐱':'🐶'} ${c.MascotaNombre}</span></td><td>${c.DuenioNombre||'-'}</td><td><span class="chip cy">${c.Tipo||'-'}</span></td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.Motivo||'-'}</td><td>${c.Peso?c.Peso+' kg':'-'}</td><td class="hi">$${Number(c.Total||0).toLocaleString()}</td><td>${fBtn}</td><td><div style="display:flex;gap:4px"><button class="btn bs" onclick="generarPresupuestoCon('${c.ID}')">💰 Recibo</button><button class="btn bs bd" onclick="borrar('Consultas','${c.ID}','con')">🗑️</button></div></td></tr>`;
   }).join('');
 }
 function filtCon(){
@@ -1334,18 +1334,20 @@ function compartirHistorialMas(){const btn=document.getElementById('btnHistMas')
 async function compartirPDF(doc,nombre,titulo){
   const blob=doc.output('blob');
   const file=new File([blob],nombre,{type:'application/pdf'});
-  // Intentar Web Share API
-  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+  const isMobile=/Android|iPhone|iPad/i.test(navigator.userAgent);
+  if(isMobile&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
     try{await navigator.share({files:[file],title:titulo,text:'GA VET - Clínica Veterinaria'});return;}
     catch(e){if(e.name==='AbortError')return;}
+    // Si share falla en móvil, abrir en visor
+    const url=URL.createObjectURL(blob);
+    window.open(url,'_blank');
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+    toast('PDF listo — compartí desde el visor');
+    return;
   }
-  // Fallback: abrir en nueva pestaña (en móvil se puede compartir desde ahí)
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;a.target='_blank';a.download=nombre;
-  document.body.appendChild(a);a.click();document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(url),30000);
-  toast('PDF listo — podés compartirlo desde el visor');
+  // PC o móvil sin share: descargar directo
+  doc.save(nombre);
+  toast('PDF descargado ✓');
 }
 
 async function generarPresupuestoCon(cid2){
@@ -1486,6 +1488,7 @@ async function compartirHistorialMascota(mid){
 }
 
 // Convierte URL de Drive al formato thumbnail que carga mejor en img tags
+function fmtFecha(f){if(!f)return'-';const d=new Date(f);if(isNaN(d))return f;return d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'});}
 function driveImg(url){
   if(!url)return '';
   if(url.startsWith('data:'))return url;
@@ -1624,7 +1627,7 @@ function rendVentas(){
   if(!S.ventas||!S.ventas.length){tb.innerHTML='<tr><td colspan="5" class="es">Sin ventas</td></tr>';return;}
   const sorted=[...S.ventas].sort((a,b)=>new Date(b.Fecha)-new Date(a.Fecha)).slice(0,20);
   tb.innerHTML=sorted.map(v=>`<tr>
-    <td style="white-space:nowrap">${v.Fecha||'-'}</td>
+    <td style="white-space:nowrap">${fmtFecha(v.Fecha)||'-'}</td>
     <td><strong>${v.Comprador||'MOSTRADOR'}</strong></td>
     <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">${v.Productos||'-'}</td>
     <td class="hi">$${Number(v.Total||0).toLocaleString()}</td>
