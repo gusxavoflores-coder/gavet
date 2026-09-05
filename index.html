@@ -691,6 +691,7 @@ function abrirNuevo(){
 }
 
 function openM(id){
+  try{
   if(id==='mCon'){
     fotosConsulta=[];rendFotosCon();
     document.getElementById('cMasID').value='';document.getElementById('cMasBuscar').value='';
@@ -714,10 +715,12 @@ function openM(id){
     document.getElementById('mCast').value='No';document.getElementById('dniAviso').style.display='none';
     document.getElementById('tituloCliente').textContent='Datos del dueño (nuevo)';
     ['cN','cT','cE','cD'].forEach(i=>{const el=document.getElementById(i);if(el){el.readOnly=false;el.style.opacity='1';}});
-    rmFotoNuevo(null);
+    rmFotoNuevo();
   }
-  document.getElementById(id).style.display='flex';
-  document.getElementById(id).classList.add('open');
+  const el=document.getElementById(id);
+  if(el){el.style.display='flex';el.classList.add('open');}
+  else{alert('No se encontró el panel: '+id);}
+  }catch(err){alert('Error al abrir '+id+': '+err.message);}
 }
 function closeM(id){const m=document.getElementById(id);m.classList.remove('open');m.style.display='';}
 document.querySelectorAll('.mo').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
