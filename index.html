@@ -546,6 +546,42 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
   </div>
 </div>
 
+<!-- MODAL EDITAR VACUNA -->
+<div class="mo" id="mEditVac">
+  <div class="md" style="max-width:500px">
+    <div class="mt">💉 Editar vacuna / desparasitación <button class="mx" onclick="closeM('mEditVac')">✕</button></div>
+    <input type="hidden" id="evID">
+    <div class="fg"><label class="fl">Mascota</label><input class="fi" id="evMas" readonly style="opacity:.7"></div>
+    <div class="fg"><label class="fl">Tipo</label>
+      <select class="fs" id="evTipo">
+        <option>Vacuna antirrábica</option><option>Triple felina</option><option>Séptuple canina</option>
+        <option>Desparasitación</option><option>Otro</option>
+      </select>
+    </div>
+    <div class="fg"><label class="fl">Laboratorio / Marca</label><input class="fi" id="evLab" placeholder="Opcional"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label class="fl">Fecha aplicación</label><input class="fi" id="evFecha" type="date"></div>
+      <div class="fg"><label class="fl">Próxima dosis</label><input class="fi" id="evProx" type="date"></div>
+    </div>
+    <div class="fg"><label class="fl">Notas</label><textarea class="ft" id="evNotas" style="min-height:55px"></textarea></div>
+    <div class="mf">
+      <button class="btn" onclick="closeM('mEditVac')">Cancelar</button>
+      <button class="btn bp" onclick="guardarEditVac()">💾 Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL VER VENTA -->
+<div class="mo" id="mVerVenta">
+  <div class="md" style="max-width:480px">
+    <div class="mt">🛒 Detalle de venta <button class="mx" onclick="closeM('mVerVenta')">✕</button></div>
+    <div id="verVentaContenido" style="padding:8px 0"></div>
+    <div class="mf">
+      <button class="btn" onclick="closeM('mVerVenta')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL VER/EDITAR CONSULTA -->
 <div class="mo" id="mVerCon">
   <div class="md" style="max-width:620px">
@@ -930,6 +966,48 @@ function calcEdad(fechaNac){
   return Math.floor(m/12)+' años';
 }
 
+function editarVac(vid){
+  const v=S.vac.find(v=>v.ID==vid);if(!v)return;
+  document.getElementById('evID').value=v.ID;
+  document.getElementById('evMas').value=(v.MascotaNombre||'')+' — '+(v.DuenioNombre||'');
+  document.getElementById('evTipo').value=v.Tipo||'Desparasitación';
+  document.getElementById('evLab').value=v.Lab||'';
+  document.getElementById('evFecha').value=(v.Fecha||'').split('T')[0];
+  document.getElementById('evProx').value=(v.Proxima||'').split('T')[0];
+  document.getElementById('evNotas').value=v.Notas||'';
+  openM('mEditVac');
+}
+async function guardarEditVac(){
+  const vid=document.getElementById('evID').value;
+  const upd={
+    Tipo:document.getElementById('evTipo').value,
+    Lab:document.getElementById('evLab').value,
+    Fecha:document.getElementById('evFecha').value,
+    Proxima:document.getElementById('evProx').value,
+    Notas:document.getElementById('evNotas').value.toUpperCase(),
+  };
+  toast('Guardando...');
+  const r=await api({action:'updateRow',sheet:'Vacunas',id:vid,data:JSON.stringify(upd)});
+  if(!r||r.error){toast('Error al guardar',1);return;}
+  const v=S.vac.find(v=>v.ID==vid);if(v)Object.assign(v,upd);
+  closeM('mEditVac');renderAll();toast('Vacuna actualizada ✓');
+}
+function verVenta(vid){
+  const v=S.ventas.find(v=>v.ID==vid);if(!v)return;
+  const prods=(v.Productos||'-').split(',').map(p=>`<div style="padding:6px 0;border-bottom:1px solid var(--border)">${p.trim()}</div>`).join('');
+  document.getElementById('verVentaContenido').innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div><div style="font-size:11px;color:var(--muted)">Fecha</div><div style="font-weight:700">${fmtFecha(v.Fecha)}</div></div>
+      <div><div style="font-size:11px;color:var(--muted)">Comprador</div><div style="font-weight:700">${v.Comprador||'MOSTRADOR'}</div></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);margin-bottom:6px">Productos</div>
+    <div style="background:var(--surface2);border-radius:8px;padding:8px 12px;margin-bottom:12px">${prods}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;background:var(--pri-light);border-radius:8px;padding:10px 14px">
+      <span style="font-weight:700;color:var(--pri-dark)">TOTAL</span>
+      <span style="font-size:20px;font-weight:900;color:var(--pri-dark)">$${Number(v.Total||0).toLocaleString()}</span>
+    </div>`;
+  openM('mVerVenta');
+}
 function abrirCon(cid){
   const c=S.con.find(c=>c.ID==cid);if(!c)return;
   const m=S.mas.find(m=>m.ID==c.MascotaID);
@@ -1032,6 +1110,7 @@ function rendVac(){
       <div style="display:flex;gap:5px;align-items:center;flex-shrink:0">
         <span class="chip ${cl}">${lb}</span>
         ${v.Avisado!=='SI'?`<button class="wa" onclick="avisarVac('${v.ID}','${v.DuenioNombre}','${v.MascotaNombre}','${v.Tipo}','${v.Proxima}')">📱 Avisar</button>`:''}
+        <button class="btn bs" onclick="editarVac('${v.ID}')">✏️</button>
         <button class="btn bs bd" onclick="borrar('Vacunas','${v.ID}','vac')">🗑️</button>
       </div>
     </div>`;
@@ -1770,12 +1849,12 @@ function rendVentas(){
   const tb=document.getElementById('tVentas');
   if(!S.ventas||!S.ventas.length){tb.innerHTML='<tr><td colspan="5" class="es">Sin ventas</td></tr>';return;}
   const sorted=[...S.ventas].sort((a,b)=>new Date(b.Fecha)-new Date(a.Fecha)).slice(0,20);
-  tb.innerHTML=sorted.map(v=>`<tr>
+  tb.innerHTML=sorted.map(v=>`<tr style="cursor:pointer" onclick="verVenta('${v.ID}')">
     <td style="white-space:nowrap">${fmtFecha(v.Fecha)||'-'}</td>
     <td><strong>${v.Comprador||'MOSTRADOR'}</strong></td>
     <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--muted)">${v.Productos||'-'}</td>
     <td class="hi">$${Number(v.Total||0).toLocaleString()}</td>
-    <td><button class="btn bs" onclick="reimprimirTicket('${v.ID}')">🧾</button></td>
+    <td onclick="event.stopPropagation()"><button class="btn bs" onclick="reimprimirTicket('${v.ID}')">🧾</button></td>
   </tr>`).join('');
 }
 
