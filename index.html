@@ -1313,6 +1313,21 @@ function fichaMascota(mid){
 
 // NAVEGACIÓN HISTORIAL
 function verConsMas(mid){const m=S.mas.find(m=>m.ID==mid);if(m){showSec('consultas',document.querySelectorAll('.nb')[3]);document.getElementById('qCon').value=m.Nombre;filtCon();}}
+// Cargar foto de Drive via canvas (evita CORS)
+async function getFotoB64(fotoURL){
+  if(!fotoURL)return null;
+  if(fotoURL.startsWith('data:'))return fotoURL;
+  return new Promise(res=>{
+    const img=new Image();img.crossOrigin='anonymous';
+    img.onload=()=>{
+      const cv=document.createElement('canvas');cv.width=img.width;cv.height=img.height;
+      cv.getContext('2d').drawImage(img,0,0);
+      try{res(cv.toDataURL('image/jpeg',0.85));}catch{res(null);}
+    };
+    img.onerror=()=>res(null);
+    img.src=driveImg(fotoURL);
+  });
+}
 function compartirHistorialMas(){const btn=document.getElementById('btnHistMas');const mid=btn.dataset.mid;if(mid)compartirHistorialMascota(mid);}
 
 // PDF
@@ -1383,21 +1398,7 @@ async function compartirHistorialMascota(mid){
   doc.setFontSize(13);doc.text('HISTORIAL CLÍNICO',210-14,12,{align:'right'});
   doc.setTextColor(0,0,0);let y=36;
 
-  // Cargar foto de la mascota via canvas (evita CORS)
-  async function getFotoB64(fotoURL){
-    if(!fotoURL)return null;
-    if(fotoURL.startsWith('data:'))return fotoURL;
-    return new Promise(res=>{
-      const img=new Image();img.crossOrigin='anonymous';
-      img.onload=()=>{
-        const cv=document.createElement('canvas');cv.width=img.width;cv.height=img.height;
-        cv.getContext('2d').drawImage(img,0,0);
-        try{res(cv.toDataURL('image/jpeg',0.85));}catch{res(null);}
-      };
-      img.onerror=()=>res(null);
-      img.src=driveImg(fotoURL);
-    });
-  }
+  // getFotoB64 definida globalmente
 
   const fotoB64=await getFotoB64(m.FotoURL);
 
