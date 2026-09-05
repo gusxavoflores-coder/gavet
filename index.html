@@ -546,6 +546,41 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
   </div>
 </div>
 
+<!-- MODAL VER/EDITAR CONSULTA -->
+<div class="mo" id="mVerCon">
+  <div class="md" style="max-width:620px">
+    <div class="mt">🩺 Detalle de consulta <button class="mx" onclick="closeM('mVerCon')">✕</button></div>
+    <input type="hidden" id="vcID">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label class="fl">Fecha</label><input class="fi" id="vcFecha" type="date"></div>
+      <div class="fg"><label class="fl">Tipo</label>
+        <select class="fs" id="vcTipo">
+          <option>Consulta clínica</option><option>Vacunación</option><option>Desparasitación</option>
+          <option>Laboratorio</option><option>Cirugía</option><option>Control</option><option>Otro</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label class="fl">Mascota</label><input class="fi" id="vcMas" readonly style="opacity:.7"></div>
+      <div class="fg"><label class="fl">Peso (kg)</label><input class="fi" id="vcPeso" type="number" step="0.1" placeholder="0.0"></div>
+    </div>
+    <div class="fg"><label class="fl">Motivo de consulta</label><textarea class="ft" id="vcMotivo" style="min-height:55px"></textarea></div>
+    <div class="fg"><label class="fl">Diagnóstico</label><textarea class="ft" id="vcDiag" style="min-height:65px"></textarea></div>
+    <div class="fg"><label class="fl">Tratamiento</label><textarea class="ft" id="vcTrat" style="min-height:65px"></textarea></div>
+    <div class="fg"><label class="fl">Productos utilizados</label><textarea class="ft" id="vcProd" style="min-height:45px" placeholder="Ej: Amoxicilina 250mg x2, Desparasitante..."></textarea></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label class="fl">Honorarios ($)</label><input class="fi" id="vcHon" type="number" placeholder="0"></div>
+      <div class="fg"><label class="fl">Total ($)</label><input class="fi" id="vcTotal" type="number" placeholder="0"></div>
+    </div>
+    <div class="fg"><label class="fl">Próximo control</label><input class="fi" id="vcProx" type="date"></div>
+    <div class="fg"><label class="fl">Notas adicionales</label><textarea class="ft" id="vcNotas" style="min-height:45px"></textarea></div>
+    <div class="mf">
+      <button class="btn" onclick="closeM('mVerCon')">Cerrar</button>
+      <button class="btn bp" onclick="guardarEditCon()">💾 Guardar cambios</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL VACUNA -->
 <div class="mo" id="mVac">
   <div class="md">
@@ -895,6 +930,45 @@ function calcEdad(fechaNac){
   return Math.floor(m/12)+' años';
 }
 
+function abrirCon(cid){
+  const c=S.con.find(c=>c.ID==cid);if(!c)return;
+  const m=S.mas.find(m=>m.ID==c.MascotaID);
+  document.getElementById('vcID').value=c.ID;
+  document.getElementById('vcFecha').value=(c.Fecha||'').split('T')[0];
+  document.getElementById('vcTipo').value=c.Tipo||'Consulta clínica';
+  document.getElementById('vcMas').value=(m?m.Nombre:c.MascotaNombre||'')+' — '+( c.DuenioNombre||'');
+  document.getElementById('vcPeso').value=c.Peso||'';
+  document.getElementById('vcMotivo').value=c.Motivo||'';
+  document.getElementById('vcDiag').value=c.Diagnostico||'';
+  document.getElementById('vcTrat').value=c.Tratamiento||'';
+  document.getElementById('vcProd').value=c.Productos||'';
+  document.getElementById('vcHon').value=c.Honorarios||'';
+  document.getElementById('vcTotal').value=c.Total||'';
+  document.getElementById('vcProx').value=(c.ProxControl||'').split('T')[0];
+  document.getElementById('vcNotas').value=c.Notas||'';
+  openM('mVerCon');
+}
+async function guardarEditCon(){
+  const cid=document.getElementById('vcID').value;
+  const upd={
+    Fecha:document.getElementById('vcFecha').value,
+    Tipo:document.getElementById('vcTipo').value,
+    Peso:document.getElementById('vcPeso').value,
+    Motivo:document.getElementById('vcMotivo').value.toUpperCase(),
+    Diagnostico:document.getElementById('vcDiag').value.toUpperCase(),
+    Tratamiento:document.getElementById('vcTrat').value.toUpperCase(),
+    Productos:document.getElementById('vcProd').value.toUpperCase(),
+    Honorarios:document.getElementById('vcHon').value,
+    Total:document.getElementById('vcTotal').value,
+    ProxControl:document.getElementById('vcProx').value,
+    Notas:document.getElementById('vcNotas').value.toUpperCase(),
+  };
+  toast('Guardando...');
+  const r=await api({action:'updateRow',sheet:'Consultas',id:cid,data:JSON.stringify(upd)});
+  if(!r||r.error){toast('Error al guardar',1);return;}
+  const c=S.con.find(c=>c.ID==cid);if(c)Object.assign(c,upd);
+  closeM('mVerCon');renderAll();toast('Consulta actualizada ✓');
+}
 function rendCon(){
   const tb=document.getElementById('tCon');
   if(!S.con.length){tb.innerHTML='<tr><td colspan="9" class="es">Sin consultas</td></tr>';return;}
@@ -902,7 +976,7 @@ function rendCon(){
   tb.innerHTML=sorted.map(c=>{
     const fotos=(c.Fotos||'').split('|').filter(Boolean);
     const fBtn=fotos.length?`<button onclick="verFotos(${JSON.stringify(fotos).replace(/"/g,'&quot;')})" style="background:var(--pri-light);border:1px solid var(--pri-mid);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--pri-dark);font-weight:700">📷 ${fotos.length}</button>`:'';
-    return `<tr><td style="white-space:nowrap">${fmtFecha(c.Fecha)||'-'}</td><td><span class="chip ${c.Especie==='Gato'?'cp':'cs'}">${c.Especie==='Gato'?'🐱':'🐶'} ${c.MascotaNombre}</span></td><td>${c.DuenioNombre||'-'}</td><td><span class="chip cy">${c.Tipo||'-'}</span></td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.Motivo||'-'}</td><td>${c.Peso?c.Peso+' kg':'-'}</td><td class="hi">$${Number(c.Total||0).toLocaleString()}</td><td>${fBtn}</td><td><div style="display:flex;gap:4px"><button class="btn bs" onclick="generarPresupuestoCon('${c.ID}')">📄 Comprobante</button><button class="btn bs bd" onclick="borrar('Consultas','${c.ID}','con')">🗑️</button></div></td></tr>`;
+    return `<tr style="cursor:pointer" onclick="abrirCon('${c.ID}')"><td style="white-space:nowrap">${fmtFecha(c.Fecha)||'-'}</td><td><span class="chip ${c.Especie==='Gato'?'cp':'cs'}">${c.Especie==='Gato'?'🐱':'🐶'} ${c.MascotaNombre}</span></td><td>${c.DuenioNombre||'-'}</td><td><span class="chip cy">${c.Tipo||'-'}</span></td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.Motivo||'-'}</td><td>${c.Peso?c.Peso+' kg':'-'}</td><td class="hi">$${Number(c.Total||0).toLocaleString()}</td><td>${fBtn}</td><td onclick="event.stopPropagation()"><div style="display:flex;gap:4px"><button class="btn bs" onclick="generarPresupuestoCon('${c.ID}')">📄 Comprobante</button><button class="btn bs bd" onclick="borrar('Consultas','${c.ID}','con')">🗑️</button></div></td></tr>`;
   }).join('');
 }
 function filtCon(){
