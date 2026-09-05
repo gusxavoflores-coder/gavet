@@ -1009,7 +1009,7 @@ function rendFotosCon(){const g=document.getElementById('fotosConGrid');if(!g)re
 
 // FOTO NUEVA MASCOTA
 function prevFotoNuevo(inp){if(!inp||!inp.files||!inp.files[0])return;comprimirFoto(inp.files[0]).then(f=>{fotoNuevoB64=f.b64;fotoNuevoMime=f.mime;document.getElementById('fPvNuevo').src='data:'+f.mime+';base64,'+f.b64;document.getElementById('fPvNuevo').style.display='block';document.getElementById('fRmNuevo').style.display='block';toast('Foto lista');});}
-function rmFotoNuevo(){fotoNuevoB64=null;fotoNuevoMime=null;document.getElementById('fPvNuevo').style.display='none';document.getElementById('fPvNuevo').src='';document.getElementById('fRmNuevo').style.display='none';document.getElementById('fINuevo').value='';}
+function rmFotoNuevo(){fotoNuevoB64=null;fotoNuevoMime=null;const pv=document.getElementById('fPvNuevo');if(pv){pv.style.display='none';pv.src='';}const rm=document.getElementById('fRmNuevo');if(rm)rm.style.display='none';document.querySelectorAll('#mNuevo input[type=file]').forEach(i=>i.value='');}
 
 // GUARDAR
 function buscarPorDNI(dni){
@@ -1061,7 +1061,7 @@ async function guardarCli(){if(!S.url)return toast('Configurá la URL primero',1
 // Foto edicion mascota
 let fotoMasEditB64=null,fotoMasEditMime=null;
 function prevFotoMasEdit(inp){if(!inp||!inp.files||!inp.files[0])return;comprimirFoto(inp.files[0]).then(f=>{fotoMasEditB64=f.b64;fotoMasEditMime=f.mime;document.getElementById('fPvMasEdit').src='data:'+f.mime+';base64,'+f.b64;document.getElementById('fPvMasEdit').style.display='block';document.getElementById('fRmMasEdit').style.display='block';toast('Foto lista');});}
-function rmFotoMasEdit(){fotoMasEditB64=null;fotoMasEditMime=null;document.getElementById('fPvMasEdit').style.display='none';document.getElementById('fPvMasEdit').src='';document.getElementById('fRmMasEdit').style.display='none';document.getElementById('fiMasEdit').value='';}
+function rmFotoMasEdit(){fotoMasEditB64=null;fotoMasEditMime=null;const pv=document.getElementById('fPvMasEdit');if(pv){pv.style.display='none';pv.src='';}const rm=document.getElementById('fRmMasEdit');if(rm)rm.style.display='none';document.querySelectorAll('#mMas input[type=file]').forEach(i=>i.value='');}
 
 let editMasId=null;
 function editMas(id){
