@@ -902,7 +902,7 @@ function rendCon(){
   tb.innerHTML=sorted.map(c=>{
     const fotos=(c.Fotos||'').split('|').filter(Boolean);
     const fBtn=fotos.length?`<button onclick="verFotos(${JSON.stringify(fotos).replace(/"/g,'&quot;')})" style="background:var(--pri-light);border:1px solid var(--pri-mid);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--pri-dark);font-weight:700">📷 ${fotos.length}</button>`:'';
-    return `<tr><td style="white-space:nowrap">${fmtFecha(c.Fecha)||'-'}</td><td><span class="chip ${c.Especie==='Gato'?'cp':'cs'}">${c.Especie==='Gato'?'🐱':'🐶'} ${c.MascotaNombre}</span></td><td>${c.DuenioNombre||'-'}</td><td><span class="chip cy">${c.Tipo||'-'}</span></td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.Motivo||'-'}</td><td>${c.Peso?c.Peso+' kg':'-'}</td><td class="hi">$${Number(c.Total||0).toLocaleString()}</td><td>${fBtn}</td><td><div style="display:flex;gap:4px"><button class="btn bs" onclick="generarPresupuestoCon('${c.ID}')">💰 Recibo</button><button class="btn bs bd" onclick="borrar('Consultas','${c.ID}','con')">🗑️</button></div></td></tr>`;
+    return `<tr><td style="white-space:nowrap">${fmtFecha(c.Fecha)||'-'}</td><td><span class="chip ${c.Especie==='Gato'?'cp':'cs'}">${c.Especie==='Gato'?'🐱':'🐶'} ${c.MascotaNombre}</span></td><td>${c.DuenioNombre||'-'}</td><td><span class="chip cy">${c.Tipo||'-'}</span></td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.Motivo||'-'}</td><td>${c.Peso?c.Peso+' kg':'-'}</td><td class="hi">$${Number(c.Total||0).toLocaleString()}</td><td>${fBtn}</td><td><div style="display:flex;gap:4px"><button class="btn bs" onclick="generarPresupuestoCon('${c.ID}')">📄 Comprobante</button><button class="btn bs bd" onclick="borrar('Consultas','${c.ID}','con')">🗑️</button></div></td></tr>`;
   }).join('');
 }
 function filtCon(){
@@ -1457,23 +1457,63 @@ async function compartirHistorialMascota(mid){
   }
   if(m.Microchip){doc.text('Microchip: '+m.Microchip,14,y);y+=8;}
 
-  // Consultas
-  doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(139,32,72);doc.text('CONSULTAS REGISTRADAS ('+cons.length+')',14,y);y+=7;
+  // Consultas detalladas
+  doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(139,32,72);
+  doc.setFillColor(200,88,120);doc.rect(14,y-4,182,10,'F');
+  doc.setTextColor(255,255,255);doc.text('CONSULTAS REGISTRADAS ('+cons.length+')',18,y+2);y+=12;
   cons.forEach((co,i)=>{
-    if(y>260){doc.addPage();y=20;}
-    doc.setFillColor(i%2===0?250:255,i%2===0?238:255,i%2===0?243:255);doc.rect(14,y-4,182,22,'F');
-    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(0,0,0);doc.text((co.Fecha||''),14,y+2);
-    doc.setTextColor(139,32,72);doc.text(co.Tipo||'',80,y+2);
-    doc.setTextColor(0,0,0);doc.text('$'+Number(co.Total||0).toLocaleString(),196,y+2,{align:'right'});
-    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(60,60,60);
-    const m2=doc.splitTextToSize(co.Motivo||'',170);doc.text(m2[0],14,y+9);
-    if(co.Tratamiento){const t2=doc.splitTextToSize('Trat: '+co.Tratamiento,170);doc.text(t2[0],14,y+15);}
-    if(co.Peso){doc.setTextColor(139,32,72);doc.text('Peso: '+co.Peso+'kg',160,y+15);}
-    y+=26;
+    const lines=[];
+    if(co.Motivo)lines.push('Motivo: '+co.Motivo);
+    if(co.Diagnostico)lines.push('Diagnóstico: '+co.Diagnostico);
+    if(co.Tratamiento)lines.push('Tratamiento: '+co.Tratamiento);
+    if(co.Productos)lines.push('Productos: '+co.Productos);
+    const textH=lines.reduce((h,l)=>h+doc.splitTextToSize(l,170).length*5,0);
+    const boxH=Math.max(26,textH+20);
+    if(y+boxH>270){doc.addPage();y=20;}
+    doc.setFillColor(i%2===0?253:255,i%2===0?238:255,i%2===0?243:255);
+    doc.roundedRect(14,y-4,182,boxH,2,2,'F');
+    doc.setDrawColor(220,150,170);doc.roundedRect(14,y-4,182,boxH,2,2,'S');
+    // Header consulta
+    doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(139,32,72);
+    doc.text(fmtFecha(co.Fecha)||'',16,y+2);
+    doc.text(co.Tipo||'',80,y+2);
+    if(co.Peso){doc.setTextColor(80,80,80);doc.text('Peso: '+co.Peso+' kg',140,y+2);}
+    doc.setTextColor(139,32,72);doc.text('$'+Number(co.Total||0).toLocaleString(),196,y+2,{align:'right'});
+    // Detalle
+    doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(40,40,40);
+    let ly=y+10;
+    lines.forEach(l=>{
+      const split=doc.splitTextToSize(l,170);
+      doc.text(split,16,ly);ly+=split.length*5+1;
+    });
+    y+=boxH+4;
   });
+
+  // Vacunas
+  const vacs=S.vac.filter(v=>v.MascotaID==mid);
+  if(vacs.length){
+    if(y>240){doc.addPage();y=20;}
+    y+=6;
+    doc.setFillColor(200,88,120);doc.rect(14,y-4,182,10,'F');
+    doc.setFont('helvetica','bold');doc.setFontSize(12);doc.setTextColor(255,255,255);
+    doc.text('VACUNAS Y DESPARASITACIONES ('+vacs.length+')',18,y+2);y+=12;
+    vacs.sort((a,b)=>new Date(b.Fecha)-new Date(a.Fecha)).forEach((v,i)=>{
+      if(y>270){doc.addPage();y=20;}
+      doc.setFillColor(i%2===0?240:255,i%2===0?248:255,i%2===0?255:255);
+      doc.rect(14,y-3,182,14,'F');
+      doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(0,80,160);
+      doc.text(v.Tipo||'',16,y+4);
+      doc.setFont('helvetica','normal');doc.setTextColor(60,60,60);
+      doc.text('Aplicada: '+fmtFecha(v.Fecha),90,y+4);
+      if(v.Proxima){doc.setTextColor(200,88,120);doc.text('Próxima: '+fmtFecha(v.Proxima),148,y+4);}
+      if(v.Lab){doc.setFont('helvetica','italic');doc.setFontSize(8);doc.setTextColor(120,120,120);doc.text(v.Lab,16,y+10);}
+      y+=16;
+    });
+  }
 
   // Total
   const total=cons.reduce((a,co)=>a+Number(co.Total||0),0);
+  if(y>260){doc.addPage();y=20;}
   doc.setDrawColor(200,88,120);doc.line(14,y,196,y);y+=6;
   doc.setFont('helvetica','bold');doc.setFontSize(11);doc.setTextColor(139,32,72);
   doc.text('TOTAL HISTÓRICO: $'+total.toLocaleString(),196,y,{align:'right'});
