@@ -914,21 +914,29 @@ function filtCon(){
   let cont=document.getElementById('btnHistMulti');
   if(!cont){cont=document.createElement('div');cont.id='btnHistMulti';cont.style='display:flex;gap:6px;flex-wrap:wrap';btn.parentElement.appendChild(cont);}
   if(q.length>=2){
-    // Buscar mascotas por nombre O por dueño
-    const masFound=S.mas.filter(m=>{
-      const nombreMatch=m.Nombre.toLowerCase().includes(q);
+    const masFound=[];
+    S.mas.forEach(m=>{
       const cli=S.cli.find(c=>c.ID==m.ClienteID);
+      const nombreMatch=m.Nombre.toLowerCase().includes(q);
       const duenioMatch=cli&&(cli.Nombre||'').toLowerCase().includes(q);
-      return nombreMatch||duenioMatch;
+      if(nombreMatch||duenioMatch){
+        masFound.push({m, cli, nombreMatch, duenioMatch});
+      }
     });
-    const cli=(id)=>{const c=S.cli.find(c=>c.ID==id);return c?c.Nombre:'';};
     if(masFound.length===1){
-      btn.style.display='inline-flex';btn.dataset.mid=masFound[0].ID;
+      btn.style.display='inline-flex';btn.dataset.mid=masFound[0].m.ID;
       btn.textContent='📋 Historial completo PDF';
       cont.innerHTML='';
     } else if(masFound.length>1){
       btn.style.display='none';
-      cont.innerHTML=masFound.map(m=>`<button class="btn bp" style="white-space:nowrap" onclick="compartirHistorialMascota('${m.ID}')">📋 ${m.Nombre} (${cli(m.ClienteID)||'sin dueño'})</button>`).join('');
+      cont.innerHTML=masFound.map(({m,cli,nombreMatch,duenioMatch})=>{
+        const label=nombreMatch&&duenioMatch
+          ?`📋 ${m.Nombre} (mascota y dueño)`
+          :nombreMatch
+          ?`📋 ${m.Nombre} · Dueño: ${cli?cli.Nombre:'?'}`
+          :`📋 ${m.Nombre} · Dueño: ${cli?cli.Nombre:'?'}`;
+        return `<button class="btn bp" style="white-space:nowrap" onclick="compartirHistorialMascota('${m.ID}')">${label}</button>`;
+      }).join('');
     } else {
       btn.style.display='none';cont.innerHTML='';
     }
