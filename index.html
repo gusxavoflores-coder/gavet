@@ -673,22 +673,21 @@ function showSec(id,btn){
 }
 
 function abrirNuevo(){
-  clienteNuevoId=null;
-  ['nDNI','cN','cT','cE','cD','mNom','mRaza','mColor','mPeso','mChip','mNot'].forEach(i=>{
-    const el=document.getElementById(i);if(el)el.value='';
-  });
-  document.getElementById('mEsp').value='Gato';
-  document.getElementById('mSexo').value='Hembra';
-  document.getElementById('mCast').value='No';
-  document.getElementById('mNac').value='';
-  document.getElementById('dniAviso').style.display='none';
-  document.getElementById('tituloCliente').textContent='Datos del dueño (nuevo)';
-  ['cN','cT','cE','cD'].forEach(i=>{
-    const el=document.getElementById(i);
-    if(el){el.readOnly=false;el.style.opacity='1';}
-  });
-  rmFotoNuevo(null);
-  openM('mNuevo');
+  try{
+    clienteNuevoId=null;
+    ['nDNI','cN','cT','cE','cD','mNom','mRaza','mColor','mPeso','mChip','mNot'].forEach(i=>{
+      const el=document.getElementById(i);if(el)el.value='';
+    });
+    const mEsp=document.getElementById('mEsp');if(mEsp)mEsp.value='Gato';
+    const mSexo=document.getElementById('mSexo');if(mSexo)mSexo.value='Hembra';
+    const mCast=document.getElementById('mCast');if(mCast)mCast.value='No';
+    const mNac=document.getElementById('mNac');if(mNac)mNac.value='';
+    const dniAviso=document.getElementById('dniAviso');if(dniAviso)dniAviso.style.display='none';
+    const tit=document.getElementById('tituloCliente');if(tit)tit.textContent='Datos del dueño (nuevo)';
+    ['cN','cT','cE','cD'].forEach(i=>{const el=document.getElementById(i);if(el){el.readOnly=false;el.style.opacity='1';}});
+    rmFotoNuevo();
+    openM('mNuevo');
+  }catch(err){alert('Error al abrir formulario: '+err.message);}
 }
 
 function openM(id){
