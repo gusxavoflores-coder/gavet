@@ -902,7 +902,7 @@ function rendCon(){
   tb.innerHTML=sorted.map(c=>{
     const fotos=(c.Fotos||'').split('|').filter(Boolean);
     const fBtn=fotos.length?`<button onclick="verFotos(${JSON.stringify(fotos).replace(/"/g,'&quot;')})" style="background:var(--pri-light);border:1px solid var(--pri-mid);border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;color:var(--pri-dark);font-weight:700">📷 ${fotos.length}</button>`:'';
-    return `<tr><td style="white-space:nowrap">${c.Fecha||'-'}</td><td><span class="chip ${c.Especie==='Gato'?'cp':'cs'}">${c.Especie==='Gato'?'🐱':'🐶'} ${c.MascotaNombre}</span></td><td>${c.DuenioNombre||'-'}</td><td><span class="chip cy">${c.Tipo||'-'}</span></td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.Motivo||'-'}</td><td>${c.Peso?c.Peso+' kg':'-'}</td><td class="hi">$${Number(c.Total||0).toLocaleString()}</td><td>${fBtn}</td><td><div style="display:flex;gap:4px"><button class="btn bs" onclick="generarPresupuestoCon('${c.ID}')">📄</button><button class="btn bs bd" onclick="borrar('Consultas','${c.ID}','con')">🗑️</button></div></td></tr>`;
+    return `<tr><td style="white-space:nowrap">${c.Fecha||'-'}</td><td><span class="chip ${c.Especie==='Gato'?'cp':'cs'}">${c.Especie==='Gato'?'🐱':'🐶'} ${c.MascotaNombre}</span></td><td>${c.DuenioNombre||'-'}</td><td><span class="chip cy">${c.Tipo||'-'}</span></td><td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${c.Motivo||'-'}</td><td>${c.Peso?c.Peso+' kg':'-'}</td><td class="hi">$${Number(c.Total||0).toLocaleString()}</td><td>${fBtn}</td><td><div style="display:flex;gap:4px"><button class="btn bs" onclick="generarPresupuestoCon('${c.ID}')">💰 Recibo</button><button class="btn bs bd" onclick="borrar('Consultas','${c.ID}','con')">🗑️</button></div></td></tr>`;
   }).join('');
 }
 function filtCon(){
@@ -1331,7 +1331,22 @@ async function getFotoB64(fotoURL){
 function compartirHistorialMas(){const btn=document.getElementById('btnHistMas');const mid=btn.dataset.mid;if(mid)compartirHistorialMascota(mid);}
 
 // PDF
-async function compartirPDF(doc,nombre,titulo){const blob=doc.output('blob');const file=new File([blob],nombre,{type:'application/pdf'});if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],title:titulo,text:'GA VET - Clínica Veterinaria'});}catch(e){if(e.name!=='AbortError')doc.save(nombre);}}else{doc.save(nombre);toast('PDF descargado');}}
+async function compartirPDF(doc,nombre,titulo){
+  const blob=doc.output('blob');
+  const file=new File([blob],nombre,{type:'application/pdf'});
+  // Intentar Web Share API
+  if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:titulo,text:'GA VET - Clínica Veterinaria'});return;}
+    catch(e){if(e.name==='AbortError')return;}
+  }
+  // Fallback: abrir en nueva pestaña (en móvil se puede compartir desde ahí)
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.target='_blank';a.download=nombre;
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+  toast('PDF listo — podés compartirlo desde el visor');
+}
 
 async function generarPresupuestoCon(cid2){
   const c=S.con.find(c=>c.ID==cid2);if(!c)return;
