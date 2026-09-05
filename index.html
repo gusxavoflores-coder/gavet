@@ -723,7 +723,7 @@ function openM(id){
   }catch(err){alert('Error al abrir '+id+': '+err.message);}
 }
 function closeM(id){const m=document.getElementById(id);m.classList.remove('open');m.style.display='';}
-document.querySelectorAll('.mo').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+document.querySelectorAll('.mo').forEach(el=>el.addEventListener('click',e=>{if(e.target===el){el.classList.remove('open');el.style.display='';}}));
 
 // CONFIG
 function logoTap(){logoTaps++;clearTimeout(logoTimer);if(logoTaps>=5){logoTaps=0;abrirConfig();}else{logoTimer=setTimeout(()=>logoTaps=0,2000);}}
