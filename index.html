@@ -452,7 +452,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
         <input class="fi" id="cMasBuscar" placeholder="Buscá por nombre de mascota o dueño..." oninput="filtrarMasConsulta(this.value)" autocomplete="off" onblur="setTimeout(()=>document.getElementById('cMasOpciones').style.display='none',200)">
         <div id="cMasOpciones" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:2px solid var(--pri-mid);border-radius:0 0 8px 8px;z-index:50;max-height:200px;overflow-y:auto;box-shadow:0 4px 12px rgba(200,88,120,.15)"></div>
       </div>
-      <div id="cMasSeleccionada" style="display:none;margin-top:6px;padding:8px 12px;background:var(--pri-light);border-radius:7px;border:1.5px solid var(--pri-mid);font-weight:700;font-size:13px;justify-content:space-between;align-items:center">
+      <div id="cMasSeleccionada" style="display:none;margin-top:6px;padding:8px 12px;background:var(--pri-light);border-radius:7px;border:1.5px solid var(--pri-mid);font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center">
         <span id="cMasSelTexto"></span>
         <button onclick="limpiarMasCon()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;font-weight:700">✕</button>
       </div>
@@ -555,7 +555,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
         <input class="fi" id="vMasBuscar" placeholder="Buscá mascota..." oninput="filtrarMasVac(this.value)" autocomplete="off" onblur="setTimeout(()=>document.getElementById('vMasOpciones').style.display='none',200)">
         <div id="vMasOpciones" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:2px solid var(--pri-mid);border-radius:0 0 8px 8px;z-index:50;max-height:180px;overflow-y:auto;box-shadow:0 4px 12px rgba(200,88,120,.15)"></div>
       </div>
-      <div id="vMasSeleccionada" style="display:none;margin-top:6px;padding:8px 12px;background:var(--pri-light);border-radius:7px;border:1.5px solid var(--pri-mid);font-weight:700;font-size:13px;justify-content:space-between;align-items:center">
+      <div id="vMasSeleccionada" style="display:none;margin-top:6px;padding:8px 12px;background:var(--pri-light);border-radius:7px;border:1.5px solid var(--pri-mid);font-weight:700;font-size:13px;display:flex;justify-content:space-between;align-items:center">
         <span id="vMasSelTexto"></span>
         <button onclick="limpiarMasVac()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;font-weight:700">✕</button>
       </div>
@@ -692,88 +692,37 @@ function abrirNuevo(){
 
 function openM(id){
   try{
-    // Helpers seguros: si algún elemento no existe en una versión publicada,
-    // no rompe todo el modal.
-    const el = x => document.getElementById(x);
-    const setVal = (x,v='') => { const e=el(x); if(e) e.value=v; };
-    const setDisp = (x,v) => { const e=el(x); if(e) e.style.display=v; };
-
-    if(id==='mCon'){
-      fotosConsulta=[];
-      if(typeof rendFotosCon==='function') rendFotosCon();
-
-      setVal('cMasID'); setVal('cMasBuscar');
-      setDisp('cMasSeleccionada','none');
-      setVal('cDuenio'); setVal('cMotivo');
-      setVal('cDiag'); setVal('cTrat');
-      setVal('cHon'); setVal('cTotal');
-      setVal('cNotas'); setVal('cPeso');
-      setVal('cProxControl');
-
-      if(typeof resetExamen==='function') resetExamen();
-
-      const rCon=el('rConCon');
-      if(rCon){
-        rCon.innerHTML=`<div class="rr"><div style="position:relative;flex:2"><input class="fi cat-prod-input" placeholder="Buscá del catálogo o escribí..." oninput="filtrarCatProd(this)" autocomplete="off" onblur="setTimeout(()=>{const d=this.parentElement.querySelector('.cat-dropdown');if(d)d.style.display='none'},200)"><div class="cat-dropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:2px solid var(--pri-mid);border-radius:0 0 8px 8px;z-index:50;max-height:150px;overflow-y:auto;box-shadow:0 4px 12px rgba(200,88,120,.15)"></div></div><input class="fi" placeholder="Cant." type="number" style="width:58px;flex:none" oninput="calcTCon()"><input class="fi" placeholder="$ Unit." type="number" style="width:85px;flex:none" oninput="calcTCon()"><button type="button" class="btn bs" onclick="addProdCon()">+</button></div>`;
-      }
-    }
-
-    if(id==='mVac'){
-      setVal('vMasID'); setVal('vMasBuscar');
-      setDisp('vMasSeleccionada','none');
-      setVal('vLab'); setVal('vProxima'); setVal('vNotas');
-      const vf=el('vFecha');
-      if(vf && !vf.value) vf.value=new Date().toISOString().split('T')[0];
-    }
-
-    if(id==='mCatMed'){
-      editCatMedId=null;
-      ['cmNom','cmPrecio','cmStock','cmNotas'].forEach(x=>setVal(x));
-      setVal('cmTipo','Antibiótico');
-      fotoCatMedB64=null;
-    }
-
-    if(id==='mCatPet'){
-      editCatPetId=null;
-      ['cpNom','cpPrecio','cpStock','cpNotas'].forEach(x=>setVal(x));
-      setVal('cpCat','Collar / Correa');
-      fotoCatPetB64=null;
-    }
-
-    if(id==='mCatSvc'){
-      editCatSvcId=null;
-      ['csNom','csPrecio','csNotas'].forEach(x=>setVal(x));
-    }
-
-    if(id==='mNuevo'){
-      clienteNuevoId=null;
-      ['nDNI','cN','cT','cE','cD','mNom','mRaza','mColor','mPeso','mChip','mNot'].forEach(x=>setVal(x));
-      setVal('mEsp','Gato'); setVal('mSexo','Hembra'); setVal('mCast','No');
-      setDisp('dniAviso','none');
-      const tit=el('tituloCliente'); if(tit) tit.textContent='Datos del dueño (nuevo)';
-      ['cN','cT','cE','cD'].forEach(x=>{const e=el(x);if(e){e.readOnly=false;e.style.opacity='1';}});
-      if(typeof rmFotoNuevo==='function') rmFotoNuevo();
-    }
-
-    const modal=el(id);
-    if(!modal){
-      alert('No se encontró el panel: '+id);
-      return;
-    }
-    modal.style.display='flex';
-    modal.classList.add('open');
-  }catch(err){
-    console.error('Error al abrir '+id,err);
-    alert('Error al abrir '+id+': '+err.message);
+  if(id==='mCon'){
+    fotosConsulta=[];rendFotosCon();
+    document.getElementById('cMasID').value='';document.getElementById('cMasBuscar').value='';
+    document.getElementById('cMasSeleccionada').style.display='none';
+    document.getElementById('cDuenio').value='';document.getElementById('cMotivo').value='';
+    document.getElementById('cDiag').value='';document.getElementById('cTrat').value='';
+    document.getElementById('cHon').value='';document.getElementById('cTotal').value='';
+    document.getElementById('cNotas').value='';document.getElementById('cPeso').value='';
+    document.getElementById('cProxControl').value='';
+    resetExamen();
+    document.getElementById('rConCon').innerHTML=`<div class="rr"><div style="position:relative;flex:2"><input class="fi cat-prod-input" placeholder="Buscá del catálogo o escribí..." oninput="filtrarCatProd(this)" autocomplete="off" onblur="setTimeout(()=>{const d=this.parentElement.querySelector('.cat-dropdown');if(d)d.style.display='none'},200)"><div class="cat-dropdown" style="display:none;position:absolute;left:0;right:0;top:100%;background:#fff;border:2px solid var(--pri-mid);border-radius:0 0 8px 8px;z-index:50;max-height:150px;overflow-y:auto;box-shadow:0 4px 12px rgba(200,88,120,.15)"></div></div><input class="fi" placeholder="Cant." type="number" style="width:58px;flex:none" oninput="calcTCon()"><input class="fi" placeholder="$ Unit." type="number" style="width:85px;flex:none" oninput="calcTCon()"><button class="btn bs" onclick="addProdCon()">+</button></div>`;
   }
+  if(id==='mVac'){
+    document.getElementById('vMasID').value='';document.getElementById('vMasBuscar').value='';
+    document.getElementById('vMasSeleccionada').style.display='none';
+  }
+  if(id==='mNuevo'){
+    clienteNuevoId=null;
+    ['nDNI','cN','cT','cE','cD','mNom','mRaza','mColor','mPeso','mChip','mNot'].forEach(i=>{const el=document.getElementById(i);if(el)el.value='';});
+    document.getElementById('mEsp').value='Gato';document.getElementById('mSexo').value='Hembra';
+    document.getElementById('mCast').value='No';document.getElementById('dniAviso').style.display='none';
+    document.getElementById('tituloCliente').textContent='Datos del dueño (nuevo)';
+    ['cN','cT','cE','cD'].forEach(i=>{const el=document.getElementById(i);if(el){el.readOnly=false;el.style.opacity='1';}});
+    rmFotoNuevo();
+  }
+  const el=document.getElementById(id);
+  if(el){el.style.display='flex';el.classList.add('open');}
+  else{alert('No se encontró el panel: '+id);}
+  }catch(err){alert('Error al abrir '+id+': '+err.message);}
 }
-
-function closeM(id){
-  const m=document.getElementById(id);
-  if(!m)return;
-  m.classList.remove('open');
-  m.style.display='';
-}
+function closeM(id){const m=document.getElementById(id);m.classList.remove('open');m.style.display='';}
 document.querySelectorAll('.mo').forEach(el=>el.addEventListener('click',e=>{if(e.target===el){el.classList.remove('open');el.style.display='';}}));
 
 // CONFIG
