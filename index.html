@@ -302,7 +302,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
       </div>
       <div style="display:flex;gap:8px;margin-top:12px">
         <button class="btn bd bs" onclick="limpiarVenta()" style="flex:1">🗑️ Limpiar</button>
-        <button class="btn bp" onclick="finalizarVenta()" style="flex:2">✅ Cobrar y generar ticket</button>
+        <button type="button" class="btn bp" onclick="ejecutarUnaVez(this,'finalizarVenta',finalizarVenta)" style="flex:2">✅ Cobrar y generar ticket</button>
       </div>
     </div>
   </div>
@@ -381,7 +381,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
     <div class="fg" style="margin-top:12px"><label class="fl">Notas</label><textarea class="ft" id="mNot" placeholder="Alergias, condiciones especiales..."></textarea></div>
     <div class="mf">
       <button class="btn" onclick="closeM('mNuevo')">Cancelar</button>
-      <button class="btn bp" onclick="guardarNuevo()">💾 Guardar todo</button>
+      <button type="button" class="btn bp" onclick="ejecutarUnaVez(this,'guardarNuevo',guardarNuevo)">💾 Guardar todo</button>
     </div>
   </div>
 </div>
@@ -397,7 +397,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
       <div class="fg"><label class="fl">Email</label><input class="fi" id="cEe"></div>
     </div>
     <div class="fg"><label class="fl">Dirección</label><input class="fi" id="cDe"></div>
-    <div class="mf"><button class="btn" onclick="closeM('mCli')">Cancelar</button><button class="btn bp" onclick="guardarCli()">Guardar</button></div>
+    <div class="mf"><button class="btn" onclick="closeM('mCli')">Cancelar</button><button type="button" class="btn bp" onclick="ejecutarUnaVez(this,'guardarCli',guardarCli)">Guardar</button></div>
   </div>
 </div>
 
@@ -439,7 +439,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
       </div>
       <button type="button" id="fRmMasEdit" class="btn bd bs" style="display:none;width:100%" onclick="rmFotoMasEdit()">✕ Quitar foto</button>
     </div>
-    <div class="mf"><button class="btn" onclick="closeM('mMas')">Cancelar</button><button class="btn bp" onclick="guardarMas()">Guardar</button></div>
+    <div class="mf"><button class="btn" onclick="closeM('mMas')">Cancelar</button><button type="button" class="btn bp" onclick="ejecutarUnaVez(this,'guardarMas',guardarMas)">Guardar</button></div>
   </div>
 </div>
 
@@ -542,7 +542,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
     </div>
 
     <div class="fg"><label class="fl">Notas adicionales</label><textarea class="ft" id="cNotas" placeholder="Observaciones..."></textarea></div>
-    <div class="mf"><button class="btn" onclick="closeM('mCon')">Cancelar</button><button class="btn bp" onclick="guardarCon()">Guardar consulta</button></div>
+    <div class="mf"><button class="btn" onclick="closeM('mCon')">Cancelar</button><button type="button" class="btn bp" onclick="ejecutarUnaVez(this,'guardarCon',guardarCon)">Guardar consulta</button></div>
   </div>
 </div>
 
@@ -576,7 +576,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
       <div class="fg"><label class="fl">Próxima dosis</label><input class="fi" id="vProxima" type="date"></div>
     </div>
     <div class="fg"><label class="fl">Notas</label><textarea class="ft" id="vNotas" placeholder="Observaciones..."></textarea></div>
-    <div class="mf"><button class="btn" onclick="closeM('mVac')">Cancelar</button><button class="btn bp" onclick="guardarVac()">Guardar</button></div>
+    <div class="mf"><button class="btn" onclick="closeM('mVac')">Cancelar</button><button type="button" class="btn bp" onclick="ejecutarUnaVez(this,'guardarVac',guardarVac)">Guardar</button></div>
   </div>
 </div>
 
@@ -599,7 +599,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
       </div>
     </div>
     <div class="fg"><label class="fl">Notas</label><textarea class="ft" id="cmNotas" placeholder="Dosis, presentación..."></textarea></div>
-    <div class="mf"><button class="btn" onclick="closeM('mCatMed')">Cancelar</button><button class="btn bp" onclick="guardarCatMed()">Guardar</button></div>
+    <div class="mf"><button class="btn" onclick="closeM('mCatMed')">Cancelar</button><button type="button" class="btn bp" onclick="ejecutarUnaVez(this,'guardarCatMed',guardarCatMed)">Guardar</button></div>
   </div>
 </div>
 
@@ -621,7 +621,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
       </div>
     </div>
     <div class="fg"><label class="fl">Notas</label><textarea class="ft" id="cpNotas" placeholder="Talle, color, marca..."></textarea></div>
-    <div class="mf"><button class="btn" onclick="closeM('mCatPet')">Cancelar</button><button class="btn bp" onclick="guardarCatPet()">Guardar</button></div>
+    <div class="mf"><button class="btn" onclick="closeM('mCatPet')">Cancelar</button><button type="button" class="btn bp" onclick="ejecutarUnaVez(this,'guardarCatPet',guardarCatPet)">Guardar</button></div>
   </div>
 </div>
 
@@ -631,7 +631,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
     <div class="fg"><label class="fl">Nombre *</label><input class="fi" id="csNom" placeholder="Consulta clínica, Castración..."></div>
     <div class="fg"><label class="fl">Precio referencia $</label><input class="fi" id="csPrecio" type="number" placeholder="0"></div>
     <div class="fg"><label class="fl">Notas</label><textarea class="ft" id="csNotas" placeholder="Incluye, observaciones..."></textarea></div>
-    <div class="mf"><button class="btn" onclick="closeM('mCatSvc')">Cancelar</button><button class="btn bp" onclick="guardarCatSvc()">Guardar</button></div>
+    <div class="mf"><button class="btn" onclick="closeM('mCatSvc')">Cancelar</button><button type="button" class="btn bp" onclick="ejecutarUnaVez(this,'guardarCatSvc',guardarCatSvc)">Guardar</button></div>
   </div>
 </div>
 
@@ -646,7 +646,7 @@ td, td *, .ms, .chip { font-weight: 700 !important; }
     <div id="configPanel" style="display:none">
       <div class="fg"><label class="fl">URL del Apps Script</label><input class="fi" id="configUrl" placeholder="https://script.google.com/macros/s/..."></div>
       <div id="configStatus" style="display:none;margin-bottom:10px;padding:8px 12px;background:var(--green-light);border-radius:7px;font-size:13px;color:var(--green);font-weight:700"></div>
-      <div class="mf"><button class="btn" onclick="closeM('mConfig')">Cerrar</button><button class="btn bp" onclick="guardarUrlConfig()">Guardar y conectar</button></div>
+      <div class="mf"><button class="btn" onclick="closeM('mConfig')">Cerrar</button><button type="button" class="btn bp" onclick="ejecutarUnaVez(this,'guardarUrlConfig',guardarUrlConfig)">Guardar y conectar</button></div>
     </div>
   </div>
 </div>
@@ -738,6 +738,39 @@ function abrirConfig(){
 }
 function verificarPin(){const pin=document.getElementById('pinInput').value;if(pin===PIN_ADMIN){document.getElementById('pinPanel').style.display='none';document.getElementById('configPanel').style.display='block';document.getElementById('configUrl').value=S.url||'';}else{alert('PIN incorrecto');document.getElementById('pinInput').value='';}}
 async function guardarUrlConfig(){const url=document.getElementById('configUrl').value.trim();if(!url)return;S.url=url;localStorage.setItem('gavet_url',url);location.reload();}
+
+
+// PROTECCIÓN GLOBAL CONTRA DOBLE CLIC / DOBLE GUARDADO
+const accionesEnCurso = new Set();
+
+async function ejecutarUnaVez(btn, clave, fn){
+  if(accionesEnCurso.has(clave)) return;
+
+  accionesEnCurso.add(clave);
+  const textoOriginal = btn ? btn.innerHTML : '';
+
+  if(btn){
+    btn.disabled = true;
+    btn.style.opacity = '.65';
+    btn.style.pointerEvents = 'none';
+    btn.innerHTML = '⏳ Guardando...';
+  }
+
+  try{
+    await fn();
+  }catch(err){
+    console.error('Error en '+clave, err);
+    toast('Ocurrió un error. Intentá nuevamente.',1);
+  }finally{
+    accionesEnCurso.delete(clave);
+    if(btn && btn.isConnected){
+      btn.disabled = false;
+      btn.style.opacity = '';
+      btn.style.pointerEvents = '';
+      btn.innerHTML = textoOriginal;
+    }
+  }
+}
 
 // API
 async function api(params){
